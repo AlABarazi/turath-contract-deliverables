@@ -59,27 +59,25 @@ def main():
     total_tests = 4
     
     # Test 1: Basic Metadata Search
-    # Note: We use "001_تاريخ_نجد" for Prod as it is confirmed uploaded there
     title_query = "Najd" if args.target == "local" else "001_تاريخ_نجد"
-    if run_test(base_url, f"Basic Metadata Search ({args.target})", title_query, 0):
+    if run_test(base_url, f"Basic Metadata Search ({args.target})", title_query, 1):
         success_count += 1
         
     # Test 2: Arabic Metadata Search
-    if run_test(base_url, "Arabic Metadata Search", "تاريخ", 0):
+    if run_test(base_url, "Arabic Metadata Search", "تاريخ", 1):
         success_count += 1
         
-    # Test 3: HOCR Full-Text Search (English)
-    # Using the exact field name with escaped colon
-    if run_test(base_url, "HOCR Full-Text Search (English)", "custom_fields.turath:fulltext:history", 0):
+    # Test 3: HOCR Full-Text Search (Exact Phrase)
+    # Using the exact field name with properly escaped colon for Lucene syntax
+    if run_test(base_url, "HOCR Full-Text Search (Exact Phrase)", r'custom_fields.turath\:fulltext:"تاريخ نجد"', 1):
         success_count += 1
 
-    # Test 4: HOCR Full-Text Search (Arabic)
-    if run_test(base_url, "HOCR Full-Text Search (Arabic)", "custom_fields.turath:fulltext:اليمامة", 0):
+    # Test 4: HOCR Full-Text Search (Broad)
+    if run_test(base_url, "HOCR Full-Text Search (Broad)", r"custom_fields.turath\:fulltext:تاريخ", 1):
         success_count += 1
 
     print("\n" + "=" * 60)
     print(f"Test Execution Complete. ({success_count}/{total_tests} executed successfully)")
-    print("Note: 0 hits does not indicate a system failure if the specific test data has not been uploaded to the target environment.")
     print("=" * 60)
 
 if __name__ == "__main__":

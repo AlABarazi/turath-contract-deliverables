@@ -33,7 +33,7 @@ def run_test(base_url, test_name, query, expected_min_hits=0):
     
     if hits < expected_min_hits:
         print(f"⚠️ WARNING: Expected at least {expected_min_hits} hits, got {hits}.")
-        print("   Note: If running against a new environment (like Prod), ensure the test data (e.g., 'Najd' book with HOCR) has been ingested.")
+        print("   Note: If running against a new environment (like Prod), ensure the test data has been ingested.")
         return False
         
     print("✅ PASSED")
@@ -59,7 +59,9 @@ def main():
     total_tests = 4
     
     # Test 1: Basic Metadata Search
-    if run_test(base_url, "Basic Metadata Search (English)", "Najd", 0): # Changed expected to 0 to prevent hard fail on prod without data
+    # Note: We use "001_تاريخ_نجد" for Prod as it is confirmed uploaded there
+    title_query = "Najd" if args.target == "local" else "001_تاريخ_نجد"
+    if run_test(base_url, f"Basic Metadata Search ({args.target})", title_query, 0):
         success_count += 1
         
     # Test 2: Arabic Metadata Search
@@ -77,7 +79,7 @@ def main():
 
     print("\n" + "=" * 60)
     print(f"Test Execution Complete. ({success_count}/{total_tests} executed successfully)")
-    print("Note: 0 hits does not indicate a system failure if the test data has not been uploaded to the target environment.")
+    print("Note: 0 hits does not indicate a system failure if the specific test data has not been uploaded to the target environment.")
     print("=" * 60)
 
 if __name__ == "__main__":

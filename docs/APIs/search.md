@@ -14,10 +14,10 @@ You can use the `q` parameter to pass standard OpenSearch/Lucene query string sy
 
 ```bash
 # Search for a specific title
-curl -k -sSL "https://127.0.0.1:5000/api/records?q=title:\"Sample Arabic History Book\"" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records?q=title:\"Sample Arabic History Book\"" | jq .
 
 # Search for a specific author
-curl -k -sSL "https://127.0.0.1:5000/api/records?q=metadata.creators.person_or_org.family_name:Al-Author" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records?q=metadata.creators.person_or_org.family_name:Al-Author" | jq .
 ```
 
 ### Full-Text HOCR Search (Custom Field)
@@ -29,7 +29,7 @@ Turath InvenioRDM implements a custom field `custom_fields.turath:fulltext` that
 ```bash
 # Search within the full text of the books
 # URL-encoded query: q=custom_fields.turath\:fulltext:"specific word"
-curl -k -sSL "https://127.0.0.1:5000/api/records?q=custom_fields.turath\:fulltext:\"history\"" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records?q=custom_fields.turath\:fulltext:\"history\"" | jq .
 ```
 
 ### Pagination and Sorting
@@ -39,7 +39,7 @@ curl -k -sSL "https://127.0.0.1:5000/api/records?q=custom_fields.turath\:fulltex
 - `sort`: Sort field (e.g., `bestmatch`, `newest`)
 
 ```bash
-curl -k -sSL "https://127.0.0.1:5000/api/records?q=history&sort=bestmatch&size=5&page=2" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records?q=history&sort=bestmatch&size=5&page=2" | jq .
 ```
 
 ---
@@ -48,7 +48,7 @@ curl -k -sSL "https://127.0.0.1:5000/api/records?q=history&sort=bestmatch&size=5
 
 Turath implements the [IIIF Content Search API 1.0](https://iiif.io/api/search/1.0/) via a dedicated lightweight Flask microservice running on port 5001. This service provides search within a specific manifest (record) for the Mirador viewer.
 
-**Base URL for IIIF Search:** `https://127.0.0.1:5001` (Local) / `https://invenio.turath-project.com:5001` (Production, adjust port as needed based on deployment config)
+**Base URL for IIIF Search:** `https://invenio.turath-project.com:5001`
 
 ### Search within a Record
 
@@ -61,7 +61,7 @@ Returns an AnnotationList of search hits (bounding boxes for words).
 
 ```bash
 # Search for "the" inside record 7cxkj-kvp29
-curl -k -sSL "https://127.0.0.1:5001/search/7cxkj-kvp29?q=the" | jq .
+curl -k -sSL "https://invenio.turath-project.com:5001/search/7cxkj-kvp29?q=the" | jq .
 ```
 
 ### Autocomplete
@@ -75,7 +75,7 @@ Provides search term suggestions within a specific record.
 
 ```bash
 # Get autocomplete suggestions starting with "th"
-curl -k -sSL "https://127.0.0.1:5001/autocomplete/7cxkj-kvp29?q=th" | jq .
+curl -k -sSL "https://invenio.turath-project.com:5001/autocomplete/7cxkj-kvp29?q=th" | jq .
 ```
 
 ### Page Annotations (Text Overlay)
@@ -88,7 +88,7 @@ Returns the full text of a specific page as an AnnotationList, used by Mirador p
 
 ```bash
 # Get annotations for page 1
-curl -k -sSL "https://127.0.0.1:5001/annotations/7cxkj-kvp29/p001" | jq .
+curl -k -sSL "https://invenio.turath-project.com:5001/annotations/7cxkj-kvp29/p001" | jq .
 ```
 
 ## Notes

@@ -21,7 +21,7 @@ The retrieved data is then formatted into a prompt context block suitable for an
 The standard InvenioRDM API returns deeply structured JSON containing all necessary bibliographic data (Title, Authors, Publication Date, Resource Type, Description). This maps perfectly to RAG metadata filters or document headers.
 
 ### 2. Full-Text Retrieval (Success)
-Instead of forcing a RAG pipeline to download heavy PDFs and run its own OCR, our system exposes the pre-processed text via the IIIF annotations endpoint (`https://127.0.0.1:5001/annotations/{pid}/{page}`).
+Instead of forcing a RAG pipeline to download heavy PDFs and run its own OCR, our system exposes the pre-processed text via the IIIF annotations endpoint (`https://invenio.turath-project.com:5001/annotations/{pid}/{page}`).
 
 The script successfully extracted 248 characters of clean Arabic text from Page 1 of record `10zkp-d5z36` ("001_تاريخ_نجد").
 

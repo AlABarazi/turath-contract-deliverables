@@ -5,17 +5,14 @@ Purpose: Developer-oriented reference for Turath InvenioRDM API Documentation
 ## Overview
 This directory contains API documentation for the Turath InvenioRDM system, including the enhanced IIIF Search services integration.
 
-**Base URL**: `https://127.0.0.1:5000`  
-**SSL Note**: Uses self-signed certificates, add `-k` flag to curl commands
+**Base URL**: `https://invenio.turath-project.com`  
 
 ## Quick Links
 
-- [Authentication](./auth.md) - API token authentication
-- [Records](./records.md) - Record management endpoints
-- [IIIF](./iiif.md) - IIIF Presentation API with Search services
-- [Files](./files.md) - File upload and download
-- [Search](./search.md) - Search API endpoints
-- [Vocabularies](./vocabularies.md) - Controlled vocabularies
+- [Records API](./records.md) - Record management endpoints
+- [Search API](./search.md) - Search API endpoints (including HOCR)
+- [Files API](./files.md) - File upload and download workflows
+- [RAG Feasibility Report](./RAG_Feasibility_Report.md) - Proof of concept for LLM integration
 
 ## Enhanced Features
 
@@ -30,7 +27,7 @@ Our InvenioRDM instance includes enhanced IIIF manifests with integrated Search 
   ],
   "service": [
     {
-      "@id": "https://127.0.0.1:5001/search/{record_pid}",
+      "@id": "https://invenio.turath-project.com:5001/search/{record_pid}",
       "profile": "http://iiif.io/api/search/0/search",
       "label": "Search within this manifest"
     }
@@ -40,13 +37,13 @@ Our InvenioRDM instance includes enhanced IIIF manifests with integrated Search 
 
 ## Configuration
 - **IIIF Search Enabled**: `RDM_IIIF_SEARCH_ENABLED = True`
-- **Search Service Base URL**: `https://127.0.0.1:5001`
+- **Search Service Base URL**: `https://invenio.turath-project.com:5001`
 ## Quick Start (verified examples)
 - Get IIIF Manifest for record `7cxkj-kvp29`:
 ```bash
-curl -k -sSL "https://127.0.0.1:5000/api/iiif/record:7cxkj-kvp29/manifest" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/iiif/record:7cxkj-kvp29/manifest" | jq .
 ```
 - Get record by PID:
 ```bash
-curl -k -sSL "https://127.0.0.1:5000/api/records/7cxkj-kvp29" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records/7cxkj-kvp29" | jq .
 ```

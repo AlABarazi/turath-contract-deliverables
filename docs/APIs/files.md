@@ -27,7 +27,7 @@ Prepares the draft record to receive a specific file.
 curl -k -X POST -H "Authorization: Bearer $RDM_API_TOKEN" \
      -H "Content-Type: application/json" \
      -d '[{"key": "document.pdf"}]' \
-     "https://127.0.0.1:5000/api/records/10zkp-d5z36/draft/files"
+     "https://invenio.turath-project.com/api/records/10zkp-d5z36/draft/files"
 ```
 
 ## 2. Upload File Content
@@ -41,7 +41,7 @@ Uploads the actual byte content of the file.
 curl -k -X PUT -H "Authorization: Bearer $RDM_API_TOKEN" \
      -H "Content-Type: application/octet-stream" \
      --data-binary @path/to/local/document.pdf \
-     "https://127.0.0.1:5000/api/records/10zkp-d5z36/draft/files/document.pdf/content"
+     "https://invenio.turath-project.com/api/records/10zkp-d5z36/draft/files/document.pdf/content"
 ```
 
 ## 3. Commit File Upload
@@ -53,7 +53,7 @@ Finalizes the upload process, telling InvenioRDM the file is fully transferred.
 **Example:**
 ```bash
 curl -k -X POST -H "Authorization: Bearer $RDM_API_TOKEN" \
-     "https://127.0.0.1:5000/api/records/10zkp-d5z36/draft/files/document.pdf/commit"
+     "https://invenio.turath-project.com/api/records/10zkp-d5z36/draft/files/document.pdf/commit"
 ```
 
 ## 4. Download a File
@@ -64,7 +64,7 @@ Retrieves the content of an uploaded file from a published record.
 
 **Example:**
 ```bash
-curl -k -sSLO "https://127.0.0.1:5000/api/records/7cxkj-kvp29/files/document.pdf/content"
+curl -k -sSLO "https://invenio.turath-project.com/api/records/7cxkj-kvp29/files/document.pdf/content"
 ```
 
 *Note: The `/content` path is crucial. Without it, you get the file's metadata, not the binary content.*

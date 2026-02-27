@@ -39,6 +39,58 @@ def run_test(base_url, test_name, query, expected_min_hits=0):
     print("✅ PASSED")
     return True
 
+def run_pagination_test(base_url):
+    print("\n--- Running Test: Search Pagination & Sorting ---")
+    search_api = f"{base_url}/api/records"
+    
+    # Page 1
+    params_p1 = {"q": "تاريخ", "size": 2, "page": 1, "sort": "bestmatch"}
+    print(f"Fetching Page 1 (size=2)...")
+    resp1 = requests.get(search_api, params=params_p1, verify=False)
+    hits1 = resp1.json().get("hits", {}).get("hits", [])
+    
+    # Page 2
+    params_p2 = {"q": "تاريخ", "size": 2, "page": 2, "sort": "bestmatch"}
+    print(f"Fetching Page 2 (size=2)...")
+    resp2 = requests.get(search_api, params=params_p2, verify=False)
+    hits2 = resp2.json().get("hits", {}).get("hits", [])
+    
+    if not hits1:
+        print("⚠️ WARNING: Not enough records to test pagination.")
+        return False
+        
+    id_p1 = [h.get("id") for h in hits1]
+    id_p2 = [h.get("id") for h in hits2]
+    
+    # Verify records are different
+    overlap = set(id_p1).intersection(set(id_p2))
+    if overlap:
+        print(f"❌ FAILED: Pagination overlap detected! {overlap}")
+        return False
+        
+    print(f"Page 1 IDs: {id_p1}")
+    print(f"Page 2 IDs: {id_p2}")
+    print("✅ PASSED: Pagination returns distinct results")
+    return True
+
+def run_error_handling_test(base_url):
+    print("\n--- Running Test: Malformed Query Error Handling ---")
+    search_api = f"{base_url}/api/records"
+    
+    # Intentionally malformed Lucene query (unclosed quote)
+    params = {"q": 'custom_fields.turath:fulltext:"unclosed quote'}
+    print(f"Query: {params['q']}")
+    
+    resp = requests.get(search_api, params=params, verify=False)
+    
+    if resp.status_code == 400:
+        print(f"Received expected HTTP 400 Bad Request.")
+        print("✅ PASSED: System gracefully handles malformed queries without crashing.")
+        return True
+    else:
+        print(f"❌ FAILED: Expected HTTP 400, got HTTP {resp.status_code}")
+        return False
+
 def main():
     parser = argparse.ArgumentParser(description="Run Search Robustness Tests")
     parser.add_argument("--target", choices=["local", "prod"], default="local", 
@@ -47,16 +99,14 @@ def main():
 
     if args.target == "prod":
         base_url = "https://invenio.turath-project.com"
-        iiif_url = "https://invenio.turath-project.com:5001"
     else:
         base_url = "https://127.0.0.1:5000"
-        iiif_url = "https://127.0.0.1:5001"
 
     print(f"Starting System Testing against {args.target.upper()} ({base_url})")
     print("=" * 60)
     
     success_count = 0
-    total_tests = 4
+    total_tests = 6
     
     # Test 1: Basic Metadata Search
     title_query = "Najd" if args.target == "local" else "001_تاريخ_نجد"
@@ -68,12 +118,19 @@ def main():
         success_count += 1
         
     # Test 3: HOCR Full-Text Search (Exact Phrase)
-    # Using the exact field name with properly escaped colon for Lucene syntax
     if run_test(base_url, "HOCR Full-Text Search (Exact Phrase)", r'custom_fields.turath\:fulltext:"تاريخ نجد"', 1):
         success_count += 1
 
     # Test 4: HOCR Full-Text Search (Broad)
     if run_test(base_url, "HOCR Full-Text Search (Broad)", r"custom_fields.turath\:fulltext:تاريخ", 1):
+        success_count += 1
+
+    # Test 5: Pagination
+    if run_pagination_test(base_url):
+        success_count += 1
+
+    # Test 6: Error Handling
+    if run_error_handling_test(base_url):
         success_count += 1
 
     print("\n" + "=" * 60)

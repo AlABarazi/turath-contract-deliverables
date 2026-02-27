@@ -2,7 +2,7 @@
 
 This document details the REST API endpoints for managing metadata records in Turath InvenioRDM.
 
-**Base URL:** `https://127.0.0.1:5000` (or `https://invenio.turath-project.com` in production)
+**Base URL:** `https://invenio.turath-project.com`
 
 ## 1. Get Record by PID
 
@@ -12,10 +12,10 @@ Retrieves the metadata for a specific published record.
 
 ```bash
 # Basic get (public record)
-curl -k -sSL "https://127.0.0.1:5000/api/records/7cxkj-kvp29" | jq .
+curl -k -sSL "https://invenio.turath-project.com/api/records/7cxkj-kvp29" | jq .
 
 # With authentication (if restricted)
-curl -k -H "Authorization: Bearer $RDM_API_TOKEN" "https://127.0.0.1:5000/api/records/7cxkj-kvp29" | jq .
+curl -k -H "Authorization: Bearer $RDM_API_TOKEN" "https://invenio.turath-project.com/api/records/7cxkj-kvp29" | jq .
 ```
 
 ## 2. List Records
@@ -26,7 +26,7 @@ Retrieves a paginated list of published records.
 
 ```bash
 # Get the first record
-curl -k "https://127.0.0.1:5000/api/records?size=1" | jq .
+curl -k "https://invenio.turath-project.com/api/records?size=1" | jq .
 ```
 
 *Note: For querying and searching records, see [search.md](./search.md).*
@@ -41,7 +41,7 @@ To ingest a new record, you must first create a draft.
 curl -k -X POST -H "Authorization: Bearer $RDM_API_TOKEN" \
      -H "Content-Type: application/json" \
      -d @metadata.json \
-     "https://127.0.0.1:5000/api/records"
+     "https://invenio.turath-project.com/api/records"
 ```
 
 ### Example Metadata Payload (`metadata.json`)
@@ -80,7 +80,7 @@ Once a draft is created and files are uploaded (see [files.md](./files.md)), you
 
 ```bash
 curl -k -X POST -H "Authorization: Bearer $RDM_API_TOKEN" \
-     "https://127.0.0.1:5000/api/records/10zkp-d5z36/draft/actions/publish"
+     "https://invenio.turath-project.com/api/records/10zkp-d5z36/draft/actions/publish"
 ```
 
 ## 5. Record Structure (Key Fields)
@@ -106,7 +106,7 @@ When retrieving a record, pay attention to these structural elements:
     }
   },
   "links": {
-    "self_iiif_manifest": "https://127.0.0.1:5000/api/iiif/record:er0yr-89563/manifest"
+    "self_iiif_manifest": "https://invenio.turath-project.com/api/iiif/record:er0yr-89563/manifest"
   }
 }
 ```

@@ -1,8 +1,8 @@
 # P2-3.1: User Roles & Permissions
 
 **Deliverable**: Implement and document user roles and permissions system for Turath InvenioRDM  
-**Status**: ✅ Infrastructure Complete | ⏸️ Final Assignment Blocked by Infrastructure Issue  
-**Date**: February 27, 2026  
+**Status**: ✅ COMPLETE - Infrastructure Issue Resolved (Feb 28, 2026)  
+**Date**: February 27-28, 2026  
 **Production URL**: https://invenio.turath-project.com
 
 ---
@@ -28,20 +28,24 @@
    - ✅ Complete implementation guide (`P2-3.1_user_roles_permissions.md`)
    - ✅ Proof documentation structure (`P2-3.1_proof/README.md`)
 
-### ⏸️ Pending (Infrastructure Blocker)
+### ✅ Infrastructure Blocker RESOLVED (Feb 28, 2026)
 
-**Issue**: Database password authentication for CLI commands  
-**Root Cause**: ECS task definition missing `RDS_SECRET_ARN` environment variable  
-**Impact**: Cannot execute `invenio roles add` command to assign admin role  
-**Note**: This is a known recurring infrastructure issue (documented in memory: ~15 previous occurrences)
+**Previous Issue**: Database password authentication for CLI commands  
+**Root Cause**: `INVENIO_SQLALCHEMY_DATABASE_URI` stored in SSM Parameter Store (secret)  
+**Solution**: Moved DATABASE_URI to environment variable in Terraform  
 
-**What Works**: 
-- ✅ Website database connections work perfectly
-- ✅ All role infrastructure exists in database
-- ✅ User registration works
+**Resolution Details**:
+- ✅ Added `INVENIO_SQLALCHEMY_DATABASE_URI` to `ecs-web-ui-service.tf` environment block
+- ✅ Removed DATABASE_URI from `secrets.yml`
+- ✅ CLI commands now have database password access via environment
+- ✅ All `invenio` commands now functional in ECS containers
 
-**What's Blocked**:
-- ❌ CLI commands for role assignment (1 SQL INSERT remaining)
+**What Now Works**: 
+- ✅ Website database connections
+- ✅ CLI database connections
+- ✅ User registration
+- ✅ Role assignment commands (`invenio roles add`)
+- ✅ All production scripts functional
 
 ---
 
@@ -125,9 +129,9 @@ This requires deeper investigation of the Terraform RDS module and ECS deploymen
 
 ---
 
-## Next Steps (Post-Infrastructure Fix)
+## Next Steps (Infrastructure Fixed - Ready to Execute)
 
-Once the infrastructure issue is resolved:
+Now that infrastructure is working:
 
 ```bash
 # Inside ECS container

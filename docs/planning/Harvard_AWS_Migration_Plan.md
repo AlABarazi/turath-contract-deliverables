@@ -62,11 +62,3 @@ This is the most critical phase. We must migrate the relational database and the
 2. **Validation Testing:** Run the automated search robustness tests (`scripts/run_search_tests.py`) against the new domain.
 3. **UI/UX Testing:** Manually verify that IIIF manifests load correctly, Mirador renders the PDFs, and the text overlay works as expected.
 
-## Total Estimated Effort
-**~1 to 2 Weeks (assuming prompt access provisioning by Harvard IT).** 
-The actual technical execution time is less than 3 days, but coordination, security reviews, and large data transfers usually extend the timeline.
-
-## Risk Factors to Discuss with Harvard IT
-1. **OpenSearch Hosting:** Does Harvard prefer managed Amazon OpenSearch, or do they require us to host ELK directly on EC2/ECS for cost reasons?
-2. **EFS Costs:** Turath relies heavily on EFS for shared filesystem access between Cantaloupe and the Invenio containers. Ensure Harvard is aware of EFS pricing models (Standard vs. One Zone).
-3. **VPC Peering:** Will the InvenioRDM instance need to talk to other internal Harvard systems? If so, VPC peering configuration must be added to the Terraform scripts.

@@ -53,8 +53,3 @@ To support this strategy efficiently, the `cantaloupe.properties` file must be o
     *   Ensure the cache volume is mounted to persistent storage (e.g., AWS EFS in production) so the cache survives container restarts.
     *   Set `FilesystemCache.TTL` to a reasonable duration (e.g., 30 days) to prevent infinite storage growth.
 4.  **Info Cache:** Enable `FilesystemCache` or `HeapCache` for the `info.json` responses to speed up Mirador initialization.
-
-## Next Steps for Implementation
-1.  Develop the `prewarm_cantaloupe.py` utility script.
-2.  Integrate this script into the end of the `upload_book.py` ingestion pipeline.
-3.  Verify the persistent EFS volume mapping for Cantaloupe's derivative cache in the Terraform configuration (`ecs-cantaloupe-service.tf`).

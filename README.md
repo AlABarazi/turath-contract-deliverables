@@ -21,6 +21,15 @@ This repository contains the complete technical documentation suite for the Tura
 
 ## Deliverables Overview
 
+### Phase 1 Deliverables
+
+#### ✅ P1-3.1: Cantaloupe Integration Review
+**File:** [`docs/status/Cantaloupe_Integration_Review.md`](./docs/status/Cantaloupe_Integration_Review.md)
+
+Report on initial Cantaloupe optimizations, focusing on FilesystemCache implementation and configuration cleanup.
+
+---
+
 ### Phase 2 Deliverables
 
 #### ✅ P2-3.2: IIIF Tiling/Caching Strategy
@@ -144,4 +153,4 @@ python scripts/run_search_tests.py
 
 ---
 
-**Delivery Verification:** All 8 contract deliverables (P2-3.2 through P3-3.4) are complete and documented. See [DELIVERABLES_MAPPING.md](./docs/DELIVERABLES_MAPPING.md) for detailed verification checklist.
+**Delivery Verification:** All 9 contract deliverables (P1-3.1 through P3-3.4) are complete and documented. See [DELIVERABLES_MAPPING.md](./docs/DELIVERABLES_MAPPING.md) for detailed verification checklist.

@@ -7,6 +7,7 @@
 Documents detailing how the system is designed, how different microservices interact, and how to extend the data models.
 
 *   **[Extensibility Framework](./architecture/Extensibility_Framework.md):** Guide on how to add new metadata custom fields, modify OpenSearch indexing (e.g., Arabic analyzers), and override React frontend components.
+*   **[Cantaloupe Integration Review](./status/Cantaloupe_Integration_Review.md):** Report on the stability and optimization of the image server integration (FilesystemSource/Cache).
 *   **[IIIF Tiling & Caching Strategy](./architecture/IIIF_Tiling_Caching_Strategy.md):** Details our decision to use Cantaloupe with cache pre-warming over complex VIPS/IIPImage preprocessing.
 
 ## 2. APIs & Integrations

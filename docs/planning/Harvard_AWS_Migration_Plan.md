@@ -1,5 +1,6 @@
 # Migration Plan: Turath InvenioRDM to Harvard AWS
 
+**Deliverable:** P3-3.3 — AWS Migration Plan
 **Date:** October 26, 2025
 **Subject:** Documenting steps, considerations, and estimated effort for migrating the Turath InvenioRDM environment to Harvard's AWS infrastructure.
 

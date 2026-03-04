@@ -1,5 +1,7 @@
 # Records API
 
+**Deliverable:** P3-2.1 — API Documentation
+
 This document details the REST API endpoints for managing metadata records in Turath InvenioRDM.
 
 **Base URL:** `https://invenio.turath-project.com`

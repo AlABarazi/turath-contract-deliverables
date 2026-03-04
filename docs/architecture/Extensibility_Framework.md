@@ -1,5 +1,6 @@
 # InvenioRDM Extensibility Framework
 
+**Deliverable:** P2-4.1 — Extensibility Documentation
 **Date:** October 26, 2025
 **Subject:** Documenting the flexibility of the metadata and search frameworks for future Turath initiatives.
 
@@ -96,35 +97,97 @@ If you add a new custom field (e.g., `turath:scribe_name`) and want it to be an 
 
 ---
 
-## 3. Frontend UI Extensibility (React Overrides)
+## 3. Frontend UI Extensibility (Overridable Registry)
 
-InvenioRDM's frontend search interface is built with React. To change how search results are displayed or how the search bar behaves, we use **Webpack Alias Overrides**.
+InvenioRDM's frontend search interface is built with React. To change how search results are displayed or how the search bar behaves, Turath uses InvenioRDM's **Overridable Registry** — a React component substitution system built into InvenioRDM's core.
 
-### How it is configured
-Instead of editing core Invenio files, we create a custom React component and tell Webpack to load *our* file instead of the default one.
+### How it works
+
+Every UI component in InvenioRDM is registered under a unique string key (e.g., `"InvenioAppRdm.Search.SearchBar.element"`). To replace a component, you export a mapping of those keys to your custom React components, and tell Webpack to load your mapping instead of the default one.
+
+### Step 1 — Write your custom component
+
+```js
+// site/turath_inveniordm/assets/semantic-ui/js/turath_inveniordm/search/TurathSearchBar.js
+
+import React from "react";
+
+export function TurathSearchBar({ queryString, onInputChange, executeSearch }) {
+  // Custom search bar — adds HOCR fulltext prefix, renders dual-mode UI
+  return (
+    <input
+      value={queryString}
+      onChange={(e) => onInputChange(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && executeSearch()}
+      placeholder="Search manuscripts..."
+    />
+  );
+}
+```
+
+### Step 2 — Register your override in the mapping file
+
+```js
+// site/turath_inveniordm/assets/semantic-ui/js/invenio_app_rdm/overridableRegistry/mapping.js
+
+import { TurathSearchBar } from "../../turath_inveniordm/search/TurathSearchBar";
+import { TurathResultsListItemCard } from "../../turath_inveniordm/search/TurathResultsListItemCard";
+
+export const overriddenComponents = {
+  "InvenioAppRdm.Search.SearchBar.element": TurathSearchBar,
+  "InvenioAppRdm.Search.ResultsList.item": TurathResultsListItemCard,
+};
+```
+
+### Step 3 — Point Webpack at your mapping file
 
 ```python
 # site/turath_inveniordm/webpack.py
 
-"aliases": {
-    # Override the default SearchBar component
-    "@invenio-app-rdm/components/SearchBar": "components/SearchBar",
-},
+theme = WebpackThemeBundle(
+    __name__,
+    "assets",
+    default="semantic-ui",
+    themes={
+        "semantic-ui": dict(
+            entry={
+                "turath-mirador-init": "./js/mirador_init.js",
+                "turath-base-theme-rdm": "./js/turath_inveniordm/turath_base_theme_rdm.js",
+            },
+            aliases={
+                # Redirect InvenioRDM's default mapping import to our custom file
+                "@js/invenio_app_rdm/overridableRegistry/mapping": (
+                    "js/invenio_app_rdm/overridableRegistry/mapping.js"
+                ),
+            },
+        ),
+    },
+)
 ```
 
-We then place our custom component in `site/turath_inveniordm/assets/semantic-ui/js/turath_inveniordm/components/SearchBar/index.js`. 
+The webpack alias intercepts the core InvenioRDM bundle's import of its own registry mapping and substitutes your file. This is the **only** Webpack alias needed — all component overrides are expressed as data in `mapping.js`, not as additional aliases.
 
-In the Turath project, this was used to intercept the user's query and automatically append `custom_fields.turath\:fulltext:` to it, ensuring that simple searches hit our massive OCR text blob seamlessly.
+### Components overridden in Turath
+
+| Registry Key | Custom Component | Purpose |
+|---|---|---|
+| `InvenioAppRdm.Search.SearchBar.element` | `TurathSearchBar` | Dual-mode search (metadata + HOCR fulltext) with Arabic placeholder |
+| `InvenioAppRdm.Search.ResultsList.item` | `TurathResultsListItemCard` | Card layout with HOCR snippet highlighting and IIIF viewer link |
 
 ### Future Initiatives
-This override mechanism can be used to customize almost any part of the UI:
-- **Search Results List:** Override `@invenio-app-rdm/search/components/ResultsList`.
-- **Record Landing Page:** Override components in `@invenio-app-rdm/record/`.
-- **Facets/Filters:** Add new sidebar filters by overriding the Facets component and linking them to your new `KeywordCF` custom fields.
 
-Always remember to run `invenio-cli assets build` after modifying React components or Webpack aliases.
+To override any other part of the UI:
+1. Find the component's registry key — browse `invenio-app-rdm` source or search for `overrideId` strings in the npm package
+2. Write your custom React component
+3. Add `"TheKey": YourComponent` to `mapping.js`
+4. Run `invenio-cli assets build` — no changes to `webpack.py` needed
+
+**Examples of commonly overridable keys:**
+- `InvenioAppRdm.Search.ActiveFilters.element` — customise active filter chips
+- `InvenioAppRdm.RecordLandingPage.RecordTitle.container` — override record title display
+- `InvenioAppRdm.Search.FacetList.element` — add or reorder sidebar facets
 
 ---
 
 ## Conclusion
-The combination of `invenio.cfg` for data modeling, OpenSearch JSON mappings for index tuning, and Webpack Aliases for UI customization provides a robust, future-proof framework. Turath can easily expand to ingest new data types (like structured prosopography data or geographic coordinates) without replacing the underlying InvenioRDM engine.
+The combination of `invenio.cfg` for data modeling, OpenSearch JSON mappings for index tuning, and the Overridable Registry for UI customization provides a robust, future-proof framework. Turath can easily expand to ingest new data types (like structured prosopography data or geographic coordinates) and surface them in a custom UI — without forking or patching the underlying InvenioRDM engine.

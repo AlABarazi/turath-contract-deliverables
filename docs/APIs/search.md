@@ -1,5 +1,7 @@
 # Search API
 
+**Deliverable:** P3-2.1 — API Documentation
+
 This document details the REST API endpoints for searching metadata records and performing full-text IIIF searches in Turath InvenioRDM.
 
 ## 1. Standard Metadata Search (InvenioRDM)

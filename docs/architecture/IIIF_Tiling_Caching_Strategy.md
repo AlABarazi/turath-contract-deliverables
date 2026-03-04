@@ -1,5 +1,6 @@
 # IIIF Tiling & Caching Strategy for Turath InvenioRDM
 
+**Deliverable:** P2-3.2 — IIIF Tiling/Caching
 **Date:** October 26, 2025
 **Subject:** Recommendations for IIIF Tiling/Caching Configuration for Optimal Performance
 

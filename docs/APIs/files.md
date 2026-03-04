@@ -1,5 +1,7 @@
 # Files API
 
+**Deliverable:** P3-2.1 — API Documentation
+
 This document details the REST API endpoints for managing files attached to records in Turath InvenioRDM.
 
 ## Overview

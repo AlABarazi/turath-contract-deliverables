@@ -70,7 +70,7 @@ IIIF manifests are generated dynamically on request:
 
 ## Pathway 2: Batch Upload Script (Technical Curators)
 
-For bulk ingestion of pre-processed book collections, the `batch_upload_books.py` script provides an automated pipeline.
+For bulk ingestion of pre-processed book collections, the `records_crud.py` script provides an automated pipeline.
 
 ### Prerequisites
 
@@ -81,15 +81,16 @@ For bulk ingestion of pre-processed book collections, the `batch_upload_books.py
 ### Expected Directory Structure
 
 ```
-renamed_books/
+processed_books/
 ├── 001_تاريخ_نجد/
 │   ├── 001_تاريخ_نجد.pdf      ← scanned book PDF
 │   ├── metadata.json           ← Turath custom metadata
+│   ├── thumbnail.jpg           ← cover thumbnail
 │   └── hocr/
 │       ├── 001.hocr
 │       ├── 002.hocr
 │       └── ...
-├── 002_كتاب_آخر/
+├── 003_تحفة_المشتاق/
 │   └── ...
 ```
 
@@ -108,54 +109,29 @@ renamed_books/
 
 ### Running the Script
 
-**Dry run (check without uploading):**
+**Upload a single book:**
 ```bash
-.venv/bin/python scripts/batch_upload_books.py \
-  --books-root "/path/to/renamed_books" \
-  --base-url https://invenio.turath-project.com \
+export RDM_API_TOKEN="<token>"
+python3 scripts/records_crud.py ingest-book \
+  --books-root "/path/to/processed_books" \
+  --book-id "001_تاريخ_نجد" \
   --include-hocr \
-  --book-ids "001_تاريخ_نجد" \
-  --dry-run
+  --base-url https://invenio.turath-project.com
 ```
 
-**Upload specific books:**
+**Upload all books (batch):**
 ```bash
-.venv/bin/python scripts/batch_upload_books.py \
-  --books-root "/path/to/renamed_books" \
-  --base-url https://invenio.turath-project.com \
-  --include-hocr \
-  --book-ids "001_تاريخ_نجد" "003_تحفة_المشتاق"
-```
-
-**Upload all books:**
-```bash
-.venv/bin/python scripts/batch_upload_books.py \
-  --books-root "/path/to/renamed_books" \
-  --base-url https://invenio.turath-project.com \
-  --include-hocr
+export RDM_API_TOKEN="<token>"
+bash scripts/batch_upload_aws.sh
 ```
 
 ### What the Script Does
 
-1. Reads `metadata.json` from each book directory
+1. Reads `metadata.json` from the book directory
 2. Creates a draft record via the InvenioRDM REST API
-3. Uploads the PDF and all HOCR files (`include-hocr` flag)
+3. Uploads the PDF and all HOCR files (`--include-hocr` flag)
 4. Publishes the record
 5. The Celery worker then processes HOCR for full-text search indexing
-6. Prints a summary report and saves results to `batch_upload_results.json`
-
-### Output Example
-
-```
-[1/2] Uploading: 001_تاريخ_نجد
-✓ Using custom fields from metadata.json
-Creating draft record...
-✅ SUCCESS - 001_تاريخ_نجد uploaded in 45.2s
-
-BATCH UPLOAD SUMMARY
-Total books: 2 | Successful: 2 | Failed: 0
-Total time: 92.5s
-```
 
 ---
 
@@ -184,7 +160,7 @@ curl -k "https://invenio.turath-project.com/api/records?q=YOUR_TITLE" | jq '.hit
 curl -k "https://invenio.turath-project.com/api/records?q=custom_fields.turath\:fulltext:\"keyword\"" | jq '.hits.total'
 
 # 3. Verify IIIF manifest is generated
-curl -k "https://invenio.turath-project.com/api/records/{record_id}/manifest" | jq '.sequences[0].canvases | length'
+curl -k "https://invenio.turath-project.com/api/iiif/record:{record_id}/manifest" | jq '.sequences[0].canvases | length'
 
 # 4. Test in-viewer IIIF search
 curl "https://invenio.turath-project.com:5001/search/{record_id}?q=keyword" | jq '.hits | length'

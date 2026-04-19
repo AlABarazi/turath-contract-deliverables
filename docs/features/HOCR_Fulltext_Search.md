@@ -123,6 +123,54 @@ Users can filter search results by:
 - **Language** (`turath:language`)
 - **Date** (publication year ranges)
 - **Subject** (`turath:subject`)
+- **Script Type**, **Creator**, **Contributor**, **Format**, **Publisher**, **Creator (Arabic)**, **Alternative Title**, **Identifier**
+
+### Adding, Removing, or Reordering Facets
+
+Facets are configured in code — there is no admin UI toggle. All changes require editing `invenio.cfg` in the [`turath-rdm`](https://github.com/AlABarazi/turath-rdm) repository, then redeploying.
+
+**File:** `invenio.cfg` (root of the repo)
+
+There are two sections to edit together:
+
+**1. Define the facet** (in `RDM_FACETS` dict, ~line 1120):
+```python
+"language": {
+    "facet": CFTermsFacet(
+        field="turath:language.id.keyword",
+        label=_("Language"),
+    ),
+    "ui": {
+        "field": CFTermsFacet.field("turath:language.id.keyword"),
+    },
+},
+```
+
+**2. Enable it in search** (in `RDM_SEARCH["facets"]` list, ~line 1234):
+```python
+"facets": RDM_SEARCH["facets"] + [
+    "script_type",
+    "creator",
+    "language",      # ← add or remove facet keys here to show/hide in UI
+    "format",
+    "resource_type",
+    "publisher",
+    # ...
+],
+```
+
+**To hide a facet from the search UI:** remove its key from the `RDM_SEARCH["facets"]` list. The facet definition in `RDM_FACETS` can stay — it will simply be inactive.
+
+**To reorder facets:** change the order of keys in the `RDM_SEARCH["facets"]` list.
+
+**To add a new facet:** add a new entry to `RDM_FACETS` (following the pattern above), then add its key to `RDM_SEARCH["facets"]`.
+
+After editing, deploy with:
+```bash
+git push origin develop
+# wait for GitHub Actions build (~10 min), then:
+./scripts/deploy.sh web-ui web-api
+```
 
 ### Search Performance Optimisation
 

@@ -68,31 +68,49 @@ IIIF manifests are generated dynamically on request:
 
 ---
 
-## Pathway 2: Batch Upload Script (Technical Curators)
+## Pathway 2: Batch Upload Script
 
-For bulk ingestion of pre-processed book collections, the `records_crud.py` script provides an automated pipeline.
+For ingesting books with full-text search support, the `records_crud.py` script provides an automated pipeline that handles everything: record creation, file upload, publishing, and search indexing.
 
 ### Prerequisites
 
-- Python 3.9+ with the InvenioRDM virtual environment activated
-- A valid API token (see `scripts/create_api_token.md`)
-- Book directory structure as described below
+- **Python 3.9 or later** installed on your computer
+  - Mac: open Terminal and run `python3 --version` to check
+  - If not installed: download from [python.org](https://www.python.org/downloads/)
+- **`requests` library** — install once by running: `pip3 install requests`
+- An internet connection to reach `invenio.turath-project.com`
 
-### Expected Directory Structure
+### Step 1 — Create an API Token
+
+The script authenticates to the server using a secret token you generate from your account.
+
+1. Open a browser and go to `https://invenio.turath-project.com/login/`
+2. Log in with the admin account
+3. Go to: `https://invenio.turath-project.com/account/settings/applications/`
+4. Under **Personal access tokens**, click **New token**
+5. Give it any name (e.g. `ingestion`) and click **Create**
+6. Copy the token immediately — it is only shown once
+7. Keep this token; you will use it in the command below
+
+### Step 2 — Prepare the Book Folder
+
+Each book must be in its own folder with this exact structure:
 
 ```
-processed_books/
-├── 001_تاريخ_نجد/
-│   ├── 001_تاريخ_نجد.pdf      ← scanned book PDF
-│   ├── metadata.json           ← Turath custom metadata
-│   ├── thumbnail.jpg           ← cover thumbnail
-│   └── hocr/
-│       ├── 001.hocr
-│       ├── 002.hocr
-│       └── ...
-├── 003_تحفة_المشتاق/
-│   └── ...
+070_مجمع_في_التاريخ_النجدي/
+├── 070_مجمع_في_التاريخ_النجدي.pdf    ← the scanned book PDF
+├── metadata.json                       ← book metadata
+├── thumbnail.jpg                       ← cover image shown in search results
+└── hocr/
+    ├── 001.hocr                        ← OCR text for page 1
+    ├── 002.hocr                        ← OCR text for page 2
+    └── ...                             ← one file per page
 ```
+
+**Rules:**
+- The folder name and the PDF filename must match exactly
+- HOCR files must be zero-padded: `001.hocr`, `002.hocr`, ..., `099.hocr`, `100.hocr`
+- `metadata.json` must contain the book's title, author, language, and other fields — see [CoA Metadata Schema](../features/CoA_Metadata_Schema.md) for the full list
 
 ### `metadata.json` Format
 
@@ -107,31 +125,88 @@ processed_books/
 }
 ```
 
-### Running the Script
+### Step 3 — Download the Script
 
-**Upload a single book:**
+Download `records_crud.py` from:
+
+`https://github.com/AlABarazi/turath-rdm/blob/main/scripts/records_crud.py`
+
+Save it to any folder on your computer and note the full path.
+
+### Step 4 — Open Terminal
+
+- **Mac:** press `Cmd + Space`, type `Terminal`, press Enter
+- **Windows:** press `Win + R`, type `cmd`, press Enter
+
+Navigate to the folder where you saved the script:
+
 ```bash
-export RDM_API_TOKEN="<token>"
-python3 scripts/records_crud.py ingest-book \
-  --books-root "/path/to/processed_books" \
-  --book-id "001_تاريخ_نجد" \
-  --include-hocr \
-  --base-url https://invenio.turath-project.com
+cd /path/to/folder/where/you/saved/the/script
 ```
 
-**Upload all books (batch):**
+### Step 5 — Run the Command
+
 ```bash
-export RDM_API_TOKEN="<token>"
-bash scripts/batch_upload_aws.sh
+RDM_API_TOKEN=<your-token-from-step-1> \
+python3 records_crud.py ingest-book \
+  --base-url https://invenio.turath-project.com \
+  --books-root /path/to/folder/containing/book/folders \
+  --book-id "070_مجمع_في_التاريخ_النجدي" \
+  --include-hocr
 ```
 
-### What the Script Does
+**What each part means:**
+
+| Part | Explanation |
+|---|---|
+| `RDM_API_TOKEN=<your-token>` | The secret token from Step 1. Replace `<your-token>` with the actual token. This authenticates you with the server. |
+| `python3 records_crud.py` | Runs the ingestion script using Python 3 |
+| `ingest-book` | The operation to perform — creates a new record, uploads all files, publishes the book, and triggers full-text search indexing |
+| `--base-url https://invenio.turath-project.com` | The address of the production server — do not change this |
+| `--books-root /path/to/books` | The folder on your computer that contains your book folders. If your book is at `/Users/yourname/books/070_.../`, then `--books-root` is `/Users/yourname/books/` |
+| `--book-id "070_مجمع_في_التاريخ_النجدي"` | The name of the book folder to upload — must match the folder name exactly, including Arabic characters |
+| `--include-hocr` | Uploads the HOCR OCR files. **Required** to make the book full-text searchable in Arabic. Without this flag the book will be published but keyword search inside its pages will not work. |
+
+### What the Script Does (automatically)
 
 1. Reads `metadata.json` from the book directory
 2. Creates a draft record via the InvenioRDM REST API
-3. Uploads the PDF and all HOCR files (`--include-hocr` flag)
-4. Publishes the record
-5. The Celery worker then processes HOCR for full-text search indexing
+3. Uploads the PDF and thumbnail
+4. Uploads all HOCR files from the `hocr/` subfolder (one API call per file — this is the slow part)
+5. Publishes the record — makes it publicly visible
+6. Triggers full-text indexing — the server processes all HOCR files and makes every word in the book searchable
+
+### Expected Output
+
+You will see progress printed in the terminal as the script runs:
+
+```
+✓ Loaded 12 custom fields from metadata.json
+[Draft] Created record: abc12-xyz99
+[PDF] Uploading 070_مجمع_في_التاريخ_النجدي.pdf ...
+[Thumbnail] Uploading thumbnail.jpg ...
+[HOCR] Uploading 001.hocr (1/214) ...
+[HOCR] Uploading 002.hocr (2/214) ...
+...
+[HOCR] Uploading 214.hocr (214/214) ...
+[Publish] Publishing record ...
+[Indexer] Triggering fulltext indexing for abc12-xyz99 ...
+[Indexer] ✅ Fulltext indexed successfully
+[Indexer]    HOCR files: 214
+[Indexer]    Fulltext length: 482300 chars
+```
+
+**How long it takes:** depends on your internet connection. Uploading 214 HOCR files typically takes 5–15 minutes. Do not close the terminal while it is running.
+
+### Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `401 Unauthorized` | Token is wrong or expired | Generate a new token in Step 1 |
+| `Book directory not found` | `--books-root` or `--book-id` path is wrong | Check the folder path and name match exactly |
+| `No PDF found` | PDF filename does not match folder name | Rename the PDF to match the folder name exactly |
+| Script runs but book is not searchable | `--include-hocr` was omitted | Re-run the command with `--include-hocr` |
+| Upload stops halfway | Network interruption | Re-run the full command — it will create a new draft |
 
 ---
 
